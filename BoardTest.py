@@ -43,7 +43,7 @@ class TestBoard(unittest.TestCase):
         '''
 
         #2: Check invalid algebraic coordinates
-        self.assertEqual(self.board.alg_coordinate_to_list_index('z9'), False)
+        self.assertEqual(self.board.alg_coordinate_to_list_index('z9'), [False, False])
 
 
     def test_piece_methods(self):

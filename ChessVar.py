@@ -121,10 +121,10 @@ class Pieces:
             return False
 
         # Converts algebraic coordinates to list indexes
-        start_list_index = board.alg_coordinate_to_list_index(alg_start_coordinate)
-        start_row, start_column = start_list_index[0], start_list_index[1]
-        end_list_index = board.alg_coordinate_to_list_index(alg_end_coordinate)
-        end_row, end_column = end_list_index[0], end_list_index[1]
+        start_row, start_column = board.alg_coordinate_to_list_index(alg_start_coordinate)
+        # start_row, start_column = start_list_index[0], start_list_index[1]
+        end_row, end_column = board.alg_coordinate_to_list_index(alg_end_coordinate)
+        # end_row, end_column = end_list_index[0], end_list_index[1]
 
         row_difference = abs(end_row - start_row)
         column_difference = abs(end_column - start_column)
@@ -213,10 +213,10 @@ class Pieces:
         """
         board = chess_var.get_board()
         # Converts algebraic coordinates to list indexes
-        start_list_index = board.alg_coordinate_to_list_index(alg_start_coordinate)
-        start_row, start_column = start_list_index[0], start_list_index[1]
-        end_list_index = board.alg_coordinate_to_list_index(alg_end_coordinate)
-        end_row, end_column = end_list_index[0], end_list_index[1]
+        start_row, start_column = board.alg_coordinate_to_list_index(alg_start_coordinate)
+        # start_row, start_column = start_list_index[0], start_list_index[1]
+        end_row, end_column = board.alg_coordinate_to_list_index(alg_end_coordinate)
+        # end_row, end_column = end_list_index[0], end_list_index[1]
 
         row_difference = abs(end_row - start_row)
         column_difference = abs(end_column - start_column)
@@ -253,13 +253,13 @@ class Pieces:
                     board (instance of Board class)
         Return value: (Boolean) True (move is valid) / False (move is invalid)
         """
-        start_list_index = board.alg_coordinate_to_list_index(alg_start_coordinate)
-        start_row = start_list_index[0]
-        start_column = start_list_index[1]
+        start_row, start_column = board.alg_coordinate_to_list_index(alg_start_coordinate)
+        # start_row = start_list_index[0]
+        # start_column = start_list_index[1]
 
-        end_list_index = board.alg_coordinate_to_list_index(alg_end_coordinate)
-        end_row = end_list_index[0]
-        end_column = end_list_index[1]
+        end_row, end_column = board.alg_coordinate_to_list_index(alg_end_coordinate)
+        # end_row = end_list_index[0]
+        # end_column = end_list_index[1]
 
         row_difference = abs(end_row - start_row)
         col_difference = abs(end_column - start_column)
@@ -268,7 +268,7 @@ class Pieces:
 
         # Check for valid non-capture: valid direction, distance, and end position
         if direction == "SOUTH":
-            open_end_position = board.get_piece_with_list_index(end_list_index)
+            open_end_position = board.get_piece_with_list_index([end_row, end_column])
 
             # Check that distance traveled is valid & pawn is NOT capturing
             # 1. Pawn starting on home rank
@@ -283,7 +283,7 @@ class Pieces:
 
         # Check for valid capture: valid direction, distance, and end position
         if (direction == "SOUTHEAST") | (direction == "SOUTHWEST"):
-            occupied_end_position = board.get_piece_with_list_index(end_list_index)
+            occupied_end_position = board.get_piece_with_list_index([end_row, end_column])
             if (occupied_end_position != ".") & (total_difference == 2):
                 return True
 
@@ -297,13 +297,13 @@ class Pieces:
                     board (instance of Board class)
         Return value: (Boolean) True (move is valid) / False (move is invalid)
         """
-        start_list_index = board.alg_coordinate_to_list_index(alg_start_coordinate)
-        start_row = start_list_index[0]
-        start_column = start_list_index[1]
+        start_row, start_column = board.alg_coordinate_to_list_index(alg_start_coordinate)
+        # start_row = start_list_index[0]
+        # start_column = start_list_index[1]
 
-        end_list_index = board.alg_coordinate_to_list_index(alg_end_coordinate)
-        end_row = end_list_index[0]
-        end_column = end_list_index[1]
+        end_row, end_column = board.alg_coordinate_to_list_index(alg_end_coordinate)
+        # end_row = end_list_index[0]
+        # end_column = end_list_index[1]
 
         row_difference = abs(end_row - start_row)
         col_difference = abs(end_column - start_column)
@@ -312,7 +312,7 @@ class Pieces:
 
         # Check for valid non-capture: valid direction, distance, and end position
         if direction == "NORTH":
-            open_end_position = board.get_piece_with_list_index(end_list_index)
+            open_end_position = board.get_piece_with_list_index([end_row, end_column])
 
             # Check that distance traveled is valid & pawn is NOT capturing
             # 1. Pawn starting on home rank
@@ -326,7 +326,7 @@ class Pieces:
 
         # Check for valid capture: valid direction, distance, and end position
         if (direction == "NORTHEAST") | (direction == "NORTHWEST"):
-            occupied_end_position = board.get_piece_with_list_index(end_list_index)
+            occupied_end_position = board.get_piece_with_list_index([end_row, end_column])
             if (occupied_end_position != ".") & (total_difference == 2):
                 return True
 
@@ -431,10 +431,10 @@ class Pieces:
         Return value: (string) 'NORTH', 'NORTHEAST', 'EAST', 'SOUTHEAST',
                       'SOUTH', 'SOUTHWEST', 'WEST', 'NORTHWEST'
         """
-        start_list_index = board.alg_coordinate_to_list_index(alg_start_coordinate)
-        start_row, start_column = start_list_index[0], start_list_index[1]
-        end_list_index = board.alg_coordinate_to_list_index(alg_end_coordinate)
-        end_row, end_column = end_list_index[0], end_list_index[1]
+        start_row, start_column = board.alg_coordinate_to_list_index(alg_start_coordinate)
+        # start_row, start_column = start_list_index[0], start_list_index[1]
+        end_row, end_column = board.alg_coordinate_to_list_index(alg_end_coordinate)
+        # end_row, end_column = end_list_index[0], end_list_index[1]
 
         # Identify vertical and horizontal direction
         if start_column == end_column:
@@ -477,10 +477,10 @@ class Pieces:
                     direction (direction of the path to check)
         Return value: True (move is valid) / False (move is invalid)
         """
-        start_list_index = board.alg_coordinate_to_list_index(alg_start_coordinate)
-        start_row, start_column = start_list_index[0], start_list_index[1]
-        end_list_index = board.alg_coordinate_to_list_index(alg_end_coordinate)
-        end_row, end_column = end_list_index[0], end_list_index[1]
+        start_row, start_column = board.alg_coordinate_to_list_index(alg_start_coordinate)
+        # start_row, start_column = start_list_index[0], start_list_index[1]
+        end_row, end_column = board.alg_coordinate_to_list_index(alg_end_coordinate)
+        # end_row, end_column = end_list_index[0], end_list_index[1]
 
         # Check blockages for vertical and horizontal directions
         if direction == 'NORTH':
@@ -614,7 +614,7 @@ class Board:
             column = self._letter_to_column_dict[letter]
             row = self._number_to_row_dict[number]
         except KeyError:
-            return False
+            return [False, False]
 
         return [row, column]
 
@@ -624,9 +624,7 @@ class Board:
         Parameters: alg_coordinate
         Return value: None
         """
-        list_index = self.alg_coordinate_to_list_index(alg_coordinate)
-        row = list_index[0]
-        column = list_index[1]
+        row, column = self.alg_coordinate_to_list_index(alg_coordinate)
         self._board_display[row][column] = piece
 
     def remove_piece(self, alg_coordinate):
@@ -635,9 +633,7 @@ class Board:
         Parameters: alg_coordinate
         Return value: None
         """
-        list_index = self.alg_coordinate_to_list_index(alg_coordinate)
-        row = list_index[0]
-        column = list_index[1]
+        row, column = self.alg_coordinate_to_list_index(alg_coordinate)
         self._board_display[row][column] = '.'
 
     def get_piece(self, alg_coordinate):
@@ -646,9 +642,7 @@ class Board:
         Parameters: alg_coordinate
         Return value: "." or letter that represents the piece in the position
         """
-        list_index = self.alg_coordinate_to_list_index(alg_coordinate)
-        row = list_index[0]
-        column = list_index[1]
+        row, column = self.alg_coordinate_to_list_index(alg_coordinate)
         piece = self._board_display[row][column]
 
         return piece
@@ -659,8 +653,7 @@ class Board:
         Parameters: alg_coordinate
         Return value: "." or letter that represents the piece in the position
         """
-        row = list_index[0]
-        column = list_index[1]
+        row, column = list_index
         piece = self._board_display[row][column]
 
         return piece
@@ -768,7 +761,7 @@ class ChessVar:
         start_on_grid = self._board.alg_coordinate_to_list_index(alg_start_coordinate)
         end_on_grid = self._board.alg_coordinate_to_list_index(alg_end_coordinate)
 
-        if (start_on_grid is False) | (end_on_grid is False):
+        if (start_on_grid == [False, False]) | (end_on_grid == [False, False]):
             return False
 
         # Retrieve pieces
@@ -913,21 +906,20 @@ class ChessVar:
            Parameters: piece_type (string), placement_square (algebraic coordinates)
            Return value: True or False
         """
-        list_index = self._board.alg_coordinate_to_list_index(placement_square)
+        row, column = self._board.alg_coordinate_to_list_index(placement_square)
 
         # Placement square is off board
-        if list_index is False:
+        if [row, column] == [False, False]:
             return False
-        row, column = list_index[0], list_index[1]
 
         # Perform initial checks
         # WHITE
         if self._player_turn == "WHITE":
             # Check if fairy piece placed on home rank
-            if row != 7:
+            if row not in [6, 7]:
                 return False
             # Check if placement_square is empty
-            if (self._board.get_piece_with_list_index(list_index) != "."):
+            if (self._board.get_piece_with_list_index([row, column]) != "."):
                 return False
             # Check if fairy_piece_type is valid
             if fairy_piece_type not in self._white.get_reserve_list():
@@ -935,9 +927,9 @@ class ChessVar:
 
         # BLACK
         if self._player_turn == "BLACK":
-            if row != 0:
+            if row not in [0, 1]:
                 return False
-            if (self._board.get_piece_with_list_index(list_index) != "."):
+            if (self._board.get_piece_with_list_index([row, column]) != "."):
                 return False
             if fairy_piece_type not in self._black.get_reserve_list():
                 return False
