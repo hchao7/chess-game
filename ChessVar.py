@@ -1,98 +1,156 @@
 # Author: Helen C
 # GitHub username: hchao7
-# Date: 3/04/24
-# Description: Chess game simulator, with Falcon and Hunter added
+# Date: 09/06/24
+# Description: Implementation of an abstract board game that is a variant of chess
 
 class Player:
-    """Responsibility: A class with methods for keeping track of each Player's reserve pieces
-       Communicates with:
-       ChessVar class — two instances of Player (white-piece player, black-piece player)
-       are declared as private members in ChessVar
+    """
+    A class representing a chess player.
+
+    This class keeps track of a player's fairy pieces (falcon and hunter).
+    It communicates with:
+    ChessVar class — 2 Player instances (white-piece player and black-piece player) declared as attributes.
+
+    Attributes:
+        _reserve_list (list): A list of fairy pieces that are available for use.
+        _fairy_piece_entry (bool): Indicates whether a fairy piece can be played.
+        _capture_count (int): The count of captured Queen, Rook, Bishop, and Knight pieces.
     """
 
     def __init__(self, reserve_list):
+        """
+        Initializes a new Player instance.
+
+        A white-piece Player's _reserve_list is initialized with ["F", "H"], for fairy and hunter.
+        A black-piece Player's _reserve_list is initialized with ["f", "h"], for fairy and hunter.
+
+        Args:
+            reserve_list (list): Fairy pieces assigned to player.
+        """
         self._reserve_list = reserve_list
         self._fairy_piece_entry = False
         self._capture_count = 0
 
     def set_capture_count(self, capture_count):
         """
-        Purpose: Sets self._capture_count
-        Parameters: capture_count (integer)
-        Return value: None
+        Sets _capture_count.
+
+        Args:
+            capture_count (int): Value _capture_count should be set to.
+
+        Returns:
+            None: This method does not return any value.
         """
         self._capture_count = capture_count
 
     def get_capture_count(self):
         """
-        Purpose: Retrieves self._capture_count
-        Parameters: None
-        Return value: self._capture_count
+        Retrieves _capture_count.
+
+        This method does not require any arguments.
+
+        Returns:
+            _capture_count (int): The count of captured Queen, Rook, Bishop, and Knight pieces.
         """
         return self._capture_count
 
     def update_capture_count(self, value):
         """
-        Purpose: Either subtracts or adds one to capture_count
-                 Called by ClassVar's make_move and enter_fairy_piece method
-                 adds one: if Queen, Rook, Bishop, or Knight is captured, add one
-                 subtracts one: if a fairy piece is used, subtract one
-        Parameters: value (either +1 or -1),
-        Return value: None
+        Updates _capture_count.
+
+        This method is called by ChessVar's make_move() and enter_fairy_piece().
+        It increases _capture_count by 1 if a Queen, Rook, Bishop, or Knight is captured.
+        It decreases _capture_count by -1 if a fairy piece is used.
+
+        Args:
+            value (int): Value _capture_count should be adjusted by.
+
+        Returns:
+            None: This method does not return any value.
         """
         self._capture_count = self._capture_count + value
 
     def update_fairy_piece_entry(self):
         """
-        Purpose: Determines if self._fairy_piece_entry should be changed
-                 Called by ClassVar's make_move and enter_fairy_piece method
-        Parameters: None
-        Return value: None
+        Updates _fairy_piece_entry.
+
+        This method is called by ChessVar's make_move() and enter_fairy_piece().
+        It checks several conditions to update _fairy_piece_entry.
+        This method does not require any arguments.
+
+        Returns:
+            None: This method does not return any value.
         """
-        # All fairy pieces in use
+        # No more fairy pieces in reserve
         if not self._reserve_list:
             self._fairy_piece_entry = False
 
-        # No main pieces captured
+        # No main pieces (Queen, Rook, Bishop, or Knight) captured
         elif self._capture_count == 0:
             self._fairy_piece_entry = False
 
-        # Main pieces captured
+        # Main piece(s) captured and fairy piece(s) in reserve
         elif self._capture_count > 0:
             self._fairy_piece_entry = True
 
     def set_reserve_list(self, reserve_list):
         """
-        Purpose: Sets self._reserve_list
-        Parameters: reserve_list (a list)
-        Return value: None
+        Sets _reserve_list.
+
+        Args:
+            reserve_list (list): Fairy pieces assigned to player.
+
+        Returns:
+            None: This method does not return any value.
         """
         self._reserve_list = reserve_list
 
     def get_reserve_list(self):
         """
-        Purpose: Gets self._reserve_list
-        Parameters: None
-        Return value: self._reserve_list
+        Retrieves _reserve_list.
+
+        This method does not require any arguments.
+
+        Returns:
+            _reserve_list (list): Fairy pieces assigned to player.
         """
         return self._reserve_list
 
     def remove_from_reserve_list(self, fairy_piece):
         """
-        Purpose: Removes fairy piece from reserve list
-        Parameters: fairy_piece
-        Return value: None
+        Removes fairy piece from reserve list.
+
+        This method is called by ChessVar's fairy_piece_actions() when a fairy piece is placed on the board.
+        The piece is removed from _reserve_list.
+
+        Args:
+            fairy_piece (str): Fairy piece to be removed.
+
+        Returns:
+            None: This method does not return any value.
         """
         self._reserve_list.remove(fairy_piece)
 
     def set_fairy_piece_entry(self, fairy_piece_entry):
+        """
+        Sets _fairy_piece_entry.
+
+        Args:
+            fairy_piece_entry (bool): Indicates if a fairy piece can be played.
+
+        Returns:
+            None: This method does not return any value.
+        """
         self._fairy_piece_entry = fairy_piece_entry
 
     def get_fairy_piece_entry(self):
         """
-        Purpose: Retrieves self._fairy_piece_entry
-        Parameters: None
-        Return value: None
+        Retrieves _fairy_piece_entry.
+
+        This method does not require any arguments.
+
+        Returns:
+            _fairy_piece_entry (bool): Indicates if a fairy piece can be played.
         """
         return self._fairy_piece_entry
 
@@ -122,20 +180,17 @@ class Pieces:
 
         # Converts algebraic coordinates to list indexes
         start_row, start_column = board.alg_coordinate_to_list_index(alg_start_coordinate)
-        # start_row, start_column = start_list_index[0], start_list_index[1]
         end_row, end_column = board.alg_coordinate_to_list_index(alg_end_coordinate)
-        # end_row, end_column = end_list_index[0], end_list_index[1]
 
-        row_difference = abs(end_row - start_row)
-        column_difference = abs(end_column - start_column)
+        row_difference, column_difference = self.row_column_difference(end_row, start_row, end_column, start_column)
 
         # Distance traveled
-        sum_of_difference = row_difference + column_difference
+        total_difference = row_difference + column_difference
 
         # King travels in a valid direction, check distance traveled
-        if (direction in ["NORTH", "EAST", "SOUTH", "WEST"]) & (sum_of_difference == 1):
+        if (direction in ["NORTH", "EAST", "SOUTH", "WEST"]) and (total_difference == 1):
             return True
-        elif (direction in ["NORTHEAST", "SOUTHEAST", "SOUTHWEST", "NORTHWEST"]) & (sum_of_difference == 2):
+        elif (direction in ["NORTHEAST", "SOUTHEAST", "SOUTHWEST", "NORTHWEST"]) and (total_difference == 2):
             return True
 
         return False
@@ -214,17 +269,14 @@ class Pieces:
         board = chess_var.get_board()
         # Converts algebraic coordinates to list indexes
         start_row, start_column = board.alg_coordinate_to_list_index(alg_start_coordinate)
-        # start_row, start_column = start_list_index[0], start_list_index[1]
         end_row, end_column = board.alg_coordinate_to_list_index(alg_end_coordinate)
-        # end_row, end_column = end_list_index[0], end_list_index[1]
 
-        row_difference = abs(end_row - start_row)
-        column_difference = abs(end_column - start_column)
+        row_difference, column_difference = self.row_column_difference(end_row, start_row, end_column, start_column)
 
         # Check that distance traveled is valid
-        if (row_difference == 2) & (column_difference == 1):
+        if (row_difference == 2) and (column_difference == 1):
             return True
-        elif (row_difference == 1) & (column_difference == 2):
+        elif (row_difference == 1) and (column_difference == 2):
             return True
 
         return False
@@ -254,16 +306,11 @@ class Pieces:
         Return value: (Boolean) True (move is valid) / False (move is invalid)
         """
         start_row, start_column = board.alg_coordinate_to_list_index(alg_start_coordinate)
-        # start_row = start_list_index[0]
-        # start_column = start_list_index[1]
-
         end_row, end_column = board.alg_coordinate_to_list_index(alg_end_coordinate)
-        # end_row = end_list_index[0]
-        # end_column = end_list_index[1]
 
-        row_difference = abs(end_row - start_row)
-        col_difference = abs(end_column - start_column)
-        total_difference = row_difference + col_difference
+        row_difference, column_difference = self.row_column_difference(end_row, start_row, end_column, start_column)
+
+        total_difference = row_difference + column_difference
         direction = self.identify_direction(alg_start_coordinate, alg_end_coordinate, board)
 
         # Check for valid non-capture: valid direction, distance, and end position
@@ -272,19 +319,19 @@ class Pieces:
 
             # Check that distance traveled is valid & pawn is NOT capturing
             # 1. Pawn starting on home rank
-            if (row_difference == 2) & (start_row == 1) & (open_end_position == "."):
+            if (row_difference == 2) and (start_row == 1) and (open_end_position == "."):
                 open_path = self.identify_blocked_square(alg_start_coordinate, alg_end_coordinate, direction, board)
                 if open_path is True:
                     return True
 
             # 2. Pawn starting on non-home rank
-            if (row_difference == 1) & (open_end_position == "."):
+            if (row_difference == 1) and (open_end_position == "."):
                 return True
 
         # Check for valid capture: valid direction, distance, and end position
-        if (direction == "SOUTHEAST") | (direction == "SOUTHWEST"):
+        if (direction == "SOUTHEAST") or (direction == "SOUTHWEST"):
             occupied_end_position = board.get_piece_with_list_index([end_row, end_column])
-            if (occupied_end_position != ".") & (total_difference == 2):
+            if (occupied_end_position != ".") and (total_difference == 2):
                 return True
 
         return False
@@ -298,16 +345,11 @@ class Pieces:
         Return value: (Boolean) True (move is valid) / False (move is invalid)
         """
         start_row, start_column = board.alg_coordinate_to_list_index(alg_start_coordinate)
-        # start_row = start_list_index[0]
-        # start_column = start_list_index[1]
-
         end_row, end_column = board.alg_coordinate_to_list_index(alg_end_coordinate)
-        # end_row = end_list_index[0]
-        # end_column = end_list_index[1]
 
-        row_difference = abs(end_row - start_row)
-        col_difference = abs(end_column - start_column)
-        total_difference = row_difference + col_difference
+        row_difference, column_difference = self.row_column_difference(end_row, start_row, end_column, start_column)
+
+        total_difference = row_difference + column_difference
         direction = self.identify_direction(alg_start_coordinate, alg_end_coordinate, board)
 
         # Check for valid non-capture: valid direction, distance, and end position
@@ -316,18 +358,18 @@ class Pieces:
 
             # Check that distance traveled is valid & pawn is NOT capturing
             # 1. Pawn starting on home rank
-            if (row_difference == 2) & (start_row == 6) & (open_end_position == "."):
+            if (row_difference == 2) and (start_row == 6) and (open_end_position == "."):
                 open_path = self.identify_blocked_square(alg_start_coordinate, alg_end_coordinate, direction, board)
                 if open_path is True:
                     return True
             # 2. Pawn starting on non-home rank
-            if (row_difference == 1) & (open_end_position == "."):
+            if (row_difference == 1) and (open_end_position == "."):
                 return True
 
         # Check for valid capture: valid direction, distance, and end position
-        if (direction == "NORTHEAST") | (direction == "NORTHWEST"):
+        if (direction == "NORTHEAST") or (direction == "NORTHWEST"):
             occupied_end_position = board.get_piece_with_list_index([end_row, end_column])
-            if (occupied_end_position != ".") & (total_difference == 2):
+            if (occupied_end_position != ".") and (total_difference == 2):
                 return True
 
         return False
@@ -432,9 +474,7 @@ class Pieces:
                       'SOUTH', 'SOUTHWEST', 'WEST', 'NORTHWEST'
         """
         start_row, start_column = board.alg_coordinate_to_list_index(alg_start_coordinate)
-        # start_row, start_column = start_list_index[0], start_list_index[1]
         end_row, end_column = board.alg_coordinate_to_list_index(alg_end_coordinate)
-        # end_row, end_column = end_list_index[0], end_list_index[1]
 
         # Identify vertical and horizontal direction
         if start_column == end_column:
@@ -449,19 +489,19 @@ class Pieces:
             else:
                 return 'WEST'
 
+        # Calculate differences without taking absolute value
         row_difference = end_row - start_row
         column_difference = end_column - start_column
 
-
         # Identify diagonal direction
         if abs(row_difference) == abs(column_difference):
-            if (row_difference < 0) & (column_difference) > 0:
+            if (row_difference < 0) and (column_difference) > 0:
                 return 'NORTHEAST'
-            elif (row_difference > 0) & (column_difference < 0):
+            elif (row_difference > 0) and (column_difference < 0):
                 return 'SOUTHWEST'
-            elif (row_difference < 0) & (column_difference < 0):
+            elif (row_difference < 0) and (column_difference < 0):
                 return 'NORTHWEST'
-            elif (row_difference > 0) & (column_difference > 0):
+            elif (row_difference > 0) and (column_difference > 0):
                 return 'SOUTHEAST'
 
         # Invalid direction
@@ -478,9 +518,7 @@ class Pieces:
         Return value: True (move is valid) / False (move is invalid)
         """
         start_row, start_column = board.alg_coordinate_to_list_index(alg_start_coordinate)
-        # start_row, start_column = start_list_index[0], start_list_index[1]
         end_row, end_column = board.alg_coordinate_to_list_index(alg_end_coordinate)
-        # end_row, end_column = end_list_index[0], end_list_index[1]
 
         # Check blockages for vertical and horizontal directions
         if direction == 'NORTH':
@@ -535,6 +573,11 @@ class Pieces:
                     return False
 
         return True
+
+    def row_column_difference(self, end_row, start_row, end_column, start_column):
+        row_diff = abs(end_row - start_row)
+        column_diff = abs(end_column - start_column)
+        return row_diff, column_diff
 
 class Board:
     """Responsibility: Represents a board the chess game is played on, with methods for
@@ -761,7 +804,7 @@ class ChessVar:
         start_on_grid = self._board.alg_coordinate_to_list_index(alg_start_coordinate)
         end_on_grid = self._board.alg_coordinate_to_list_index(alg_end_coordinate)
 
-        if (start_on_grid == [False, False]) | (end_on_grid == [False, False]):
+        if (start_on_grid == [False, False]) or (end_on_grid == [False, False]):
             return False
 
         # Retrieve pieces
@@ -776,11 +819,11 @@ class ChessVar:
         # Check if start_piece belongs to opponent
         # Check if end_piece belongs to current player
         if self._player_turn == "WHITE":
-           if (start_piece not in self._white_pieces) | (end_piece in self._white_pieces):
+           if (start_piece not in self._white_pieces) or (end_piece in self._white_pieces):
                return False
 
         if self._player_turn == "BLACK":
-           if (start_piece not in self._black_pieces) | (end_piece in self._black_pieces):
+           if (start_piece not in self._black_pieces) or (end_piece in self._black_pieces):
               return False
 
         # All conditions passed
@@ -794,12 +837,12 @@ class ChessVar:
         """
 
         # White piece captured black main piece, so update black fairy piece status
-        if (self._player_turn == "WHITE") & (captured_piece in ['q', 'r', 'b', 'n']):
+        if (self._player_turn == "WHITE") and (captured_piece in ['q', 'r', 'b', 'n']):
             self._black.update_capture_count(1)
             self._black.update_fairy_piece_entry()
 
         # Black piece captured white main piece, so update white fairy piece status
-        if (self._player_turn == "BLACK") & (captured_piece in ['Q', 'R', 'B', 'N']):
+        if (self._player_turn == "BLACK") and (captured_piece in ['Q', 'R', 'B', 'N']):
             self._white.update_capture_count(1)
             self._white.update_fairy_piece_entry()
 
