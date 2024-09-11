@@ -155,39 +155,44 @@ class Player:
         return self._fairy_piece_entry
 
 class Pieces:
-    """Responsibility: A class with static methods that determine
-                       the validity of moves for all pieces
-       Communicates with:
-       ChessVar class — an instance of Pieces is declared as a private member in ChessVar to determine if
-       a move entered by the player is valid
-       Board class — several Piece methods accept an instance of Board as an argument
+    """
+        A static class representing chess pieces.
+
+        This class has static methods that determine if a chess move by any chess piece is valid.
+        Each method checks the validity of moves based on the specific movement rules of each piece.
+        It communicates with:
+        ChessVar class — Called by is_valid_move() to determine if a move is valid.
+
+        Attributes:
+            None
     """
 
-    def is_valid_move_for_king(self, alg_start_coordinate, alg_end_coordinate, chess_var):
+    def is_valid_move_for_king(alg_start_coordinate, alg_end_coordinate, chess_var):
         """
-        Purpose: Determines if it is valid for king to move to alg_end_coordinate
-        Parameters: alg_start_coordinate (king's current position),
-                    alg_end_coordinate (king's potential end position),
-                    board (instance of Board class)
-        Return value: True (move is valid) / False (move is invalid)
-        """
-        board = chess_var.get_board()
-        direction = self.identify_direction(alg_start_coordinate, alg_end_coordinate, board)
+        Checks if king can move to alg_end_coordinate legally.
 
-        # Invalid direction
-        if direction == 'N/A':
+        Args:
+            alg_start_coordinate (str): King's current position.
+            alg_end_coordinate (str): King's potential end position.
+            chess_var (ChessVar): Instance of the current game state.
+
+        Returns:
+            True or False (bool): Indicates if move is illegal or legal.
+        """
+
+        # Checks direction of move
+        board = chess_var.get_board()
+        direction = Pieces.identify_direction(alg_start_coordinate, alg_end_coordinate, board)
+        if direction == 'N/A':  # Invalid direction
             return False
 
-        # Converts algebraic coordinates to list indexes
+        # Calculates distance traveled between start and end coordinates
         start_row, start_column = board.alg_coordinate_to_list_index(alg_start_coordinate)
         end_row, end_column = board.alg_coordinate_to_list_index(alg_end_coordinate)
-
-        row_difference, column_difference = self.row_column_difference(end_row, start_row, end_column, start_column)
-
-        # Distance traveled
+        row_difference, column_difference = Pieces.row_column_difference(end_row, start_row, end_column, start_column)
         total_difference = row_difference + column_difference
 
-        # King travels in a valid direction, check distance traveled
+        # Checks if King traveled a valid direction and distance
         if (direction in ["NORTH", "EAST", "SOUTH", "WEST"]) and (total_difference == 1):
             return True
         elif (direction in ["NORTHEAST", "SOUTHEAST", "SOUTHWEST", "NORTHWEST"]) and (total_difference == 2):
@@ -195,85 +200,100 @@ class Pieces:
 
         return False
 
-    def is_valid_move_for_queen(self, alg_start_coordinate, alg_end_coordinate, chess_var):
+    def is_valid_move_for_queen(alg_start_coordinate, alg_end_coordinate, chess_var):
         """
-        Purpose: Determines if it is valid for queen to move to alg_end_coordinate
-        Parameters: alg_start_coordinate (queen's current position),
-                    alg_end_coordinate (queen's potential end position),
-                    board (instance of Board class)
-        Return value: True (move is valid) / False (move is invalid)
+        Checks if queen can move to alg_end_coordinate legally.
+
+        Args:
+            alg_start_coordinate (str): Queen's current position.
+            alg_end_coordinate (str): Queen's potential end position.
+            chess_var (ChessVar): Instance of the current game state.
+
+        Returns:
+            True or False (bool): Indicates if move is valid or invalid.
         """
+        # Checks direction of move
         board = chess_var.get_board()
-        direction = self.identify_direction(alg_start_coordinate, alg_end_coordinate, board)
-
-        # Invalid direction
-        if direction == 'N/A':
+        direction = Pieces.identify_direction(alg_start_coordinate, alg_end_coordinate, board)
+        if direction == 'N/A':  # Invalid direction
             return False
-        open_path = self.identify_blocked_square(alg_start_coordinate, alg_end_coordinate, direction, board)
 
-        # Path is blocked
+        # Checks if path is blocked by another piece
+        open_path = Pieces.identify_blocked_square(alg_start_coordinate, alg_end_coordinate, direction, board)
         if open_path is False:
             return False
 
         return True
 
-    def is_valid_move_for_rook(self, alg_start_coordinate, alg_end_coordinate, chess_var):
+    def is_valid_move_for_rook(alg_start_coordinate, alg_end_coordinate, chess_var):
         """
-        Purpose: Determines if it is valid for rook to move to alg_end_coordinate
-        Parameters: alg_start_coordinate (rook's current position),
-                    alg_end_coordinate (rook's potential end position), board (instance of Board class)
-        Return value: True (move is valid) / False (move is invalid)
-        """
-        board = chess_var.get_board()
-        direction = self.identify_direction(alg_start_coordinate, alg_end_coordinate, board)
+        Checks if rook can move to alg_end_coordinate legally.
 
-        # Invalid direction
+        Args:
+            alg_start_coordinate (str): Rook's current position.
+            alg_end_coordinate (str): Rook's potential end position.
+            chess_var (ChessVar): Instance of the current game state.
+
+        Returns:
+            True or False (bool): Indicates if move is valid or invalid.
+        """
+        # Checks direction of move
+        board = chess_var.get_board()
+        direction = Pieces.identify_direction(alg_start_coordinate, alg_end_coordinate, board)
         if direction not in ['NORTH', 'SOUTH', 'EAST', 'WEST']:
             return False
-        open_path = self.identify_blocked_square(alg_start_coordinate, alg_end_coordinate, direction, board)
 
-        # Path is blocked
+        # Checks if path is blocked
+        open_path = Pieces.identify_blocked_square(alg_start_coordinate, alg_end_coordinate, direction, board)
         if open_path is False:
             return False
 
         return True
 
-    def is_valid_move_for_bishop(self, alg_start_coordinate, alg_end_coordinate, chess_var):
+    def is_valid_move_for_bishop(alg_start_coordinate, alg_end_coordinate, chess_var):
         """
-        Purpose: Determines if it is valid for bishop to move to alg_end_coordinate
-        Parameters: alg_start_coordinate (bishop's current position),
-                    alg_end_coordinate (bishop's potential end position), board (instance of Board class)
-        Return value: True (move is valid) / False (move is invalid)
-        """
-        board = chess_var.get_board()
-        direction = self.identify_direction(alg_start_coordinate, alg_end_coordinate, board)
+        Checks if bishop can move to alg_end_coordinate legally.
 
-        # Invalid direction
+        Args:
+            alg_start_coordinate (str): Bishop's current position.
+            alg_end_coordinate (str): Bishop's potential end position.
+            chess_var (ChessVar): Instance of the current game state.
+
+        Returns:
+            True or False (bool): Indicates if move is valid or invalid.
+        """
+        # Checks direction of move
+        board = chess_var.get_board()
+        direction = Pieces.identify_direction(alg_start_coordinate, alg_end_coordinate, board)
         if direction not in ['NORTHEAST', 'SOUTHWEST', 'NORTHWEST', 'SOUTHEAST']:
             return False
 
-        # Path is blocked
-        open_path = self.identify_blocked_square(alg_start_coordinate, alg_end_coordinate, direction, board)
+        # Checks if path is blocked
+        open_path = Pieces.identify_blocked_square(alg_start_coordinate, alg_end_coordinate, direction, board)
         if open_path is False:
             return False
 
         return True
 
-    def is_valid_move_for_knight(self, alg_start_coordinate, alg_end_coordinate, chess_var):
+    def is_valid_move_for_knight(alg_start_coordinate, alg_end_coordinate, chess_var):
         """
-        Purpose: Determines if it is valid for knight to move to alg_end_coordinate
-        Parameters: alg_start_coordinate (knight's current position),
-                    alg_end_coordinate (knight's potential end position), board (instance of Board class)
-        Return value: True (move is valid) / False (move is invalid)
+        Checks if knight can move to alg_end_coordinate legally.
+
+        Args:
+            alg_start_coordinate (str): Knight's current position.
+            alg_end_coordinate (str): Knight's potential end position.
+            chess_var (ChessVar): Instance of the current game state.
+
+        Returns:
+            True or False (bool): Indicates if move is valid or invalid.
         """
+        # Calculates distance traveled between start and end coordinates
         board = chess_var.get_board()
-        # Converts algebraic coordinates to list indexes
         start_row, start_column = board.alg_coordinate_to_list_index(alg_start_coordinate)
         end_row, end_column = board.alg_coordinate_to_list_index(alg_end_coordinate)
+        row_difference, column_difference = Pieces.row_column_difference(end_row, start_row, end_column, start_column)
 
-        row_difference, column_difference = self.row_column_difference(end_row, start_row, end_column, start_column)
-
-        # Check that distance traveled is valid
+        # Checks if knight traveled a valid distance
         if (row_difference == 2) and (column_difference == 1):
             return True
         elif (row_difference == 1) and (column_difference == 2):
@@ -281,54 +301,73 @@ class Pieces:
 
         return False
 
-    def is_valid_move_for_pawn(self, alg_start_coordinate, alg_end_coordinate, chess_var):
+    def is_valid_move_for_pawn(alg_start_coordinate, alg_end_coordinate, chess_var):
         """
-        Purpose: Determines if it is valid for pawn to move to alg_end_coordinate
-        Parameters: alg_start_coordinate (pawn's current position),
-                    alg_end_coordinate (pawn's potential end position),
-                    board (instance of Board class)
-        Return value: (Boolean) True (move is valid) / False (move is invalid)
+        Checks if pawn can move to alg_end_coordinate legally.
+
+        This method calls helper methods is_valid_move_for_pawn_white() or is_valid_move_for_pawn_black().
+
+        Args:
+            alg_start_coordinate (str): Pawn's current position.
+            alg_end_coordinate (str): Pawn's potential end position.
+            chess_var (ChessVar): Instance of the current game state.
+
+        Returns:
+            True or False (bool): Indicates if move is valid or invalid.
         """
         board = chess_var.get_board()
         player_turn = chess_var.get_player_turn()
+
+        # Calls helper method based on player_turn
         if player_turn == "WHITE":
-            return self.is_valid_move_for_pawn_white(alg_start_coordinate, alg_end_coordinate, board)
+            return Pieces.is_valid_move_for_pawn_white(alg_start_coordinate, alg_end_coordinate, board)
         else:
-            return self.is_valid_move_for_pawn_black(alg_start_coordinate, alg_end_coordinate, board)
+            return Pieces.is_valid_move_for_pawn_black(alg_start_coordinate, alg_end_coordinate, board)
 
 
-    def is_valid_move_for_pawn_black(self, alg_start_coordinate, alg_end_coordinate, board):
+    def is_valid_move_for_pawn_black(alg_start_coordinate, alg_end_coordinate, board):
         """
-        Purpose: Determines if it is valid for WHITE pawn to move to alg_end_coordinate
-        Parameters: alg_start_coordinate (pawn's current position),
-                    alg_end_coordinate (pawn's potential end position),
-                    board (instance of Board class)
-        Return value: (Boolean) True (move is valid) / False (move is invalid)
+        Checks if black pawn can move to alg_end_coordinate legally.
+
+        This method is a helper method for is_valid_move_for_pawn().
+        Rules for pawn moves vary depending on whether the pawn is capturing another piece.
+
+        Args:
+            alg_start_coordinate (str): Pawn's current position.
+            alg_end_coordinate (str): Pawn's potential end position.
+            board (Board): Instance of the current board state.
+
+        Returns:
+            True or False (bool): Indicates if move is valid or invalid.
         """
+        # Calculates distance traveled between start and end coordinates
         start_row, start_column = board.alg_coordinate_to_list_index(alg_start_coordinate)
         end_row, end_column = board.alg_coordinate_to_list_index(alg_end_coordinate)
-
-        row_difference, column_difference = self.row_column_difference(end_row, start_row, end_column, start_column)
-
+        row_difference, column_difference = Pieces.row_column_difference(end_row, start_row, end_column, start_column)
         total_difference = row_difference + column_difference
-        direction = self.identify_direction(alg_start_coordinate, alg_end_coordinate, board)
 
-        # Check for valid non-capture: valid direction, distance, and end position
+        # Identifies direction of move
+        direction = Pieces.identify_direction(alg_start_coordinate, alg_end_coordinate, board)
+
+        # Checks if non-capture moves are valid
+        # Checks direction, distance traveled, and end coordinate
+        # Square represented by end coordinate must be empty
         if direction == "SOUTH":
             open_end_position = board.get_piece_with_list_index([end_row, end_column])
 
-            # Check that distance traveled is valid & pawn is NOT capturing
-            # 1. Pawn starting on home rank
+            # 1. Condition where pawn starts on home rank
             if (row_difference == 2) and (start_row == 1) and (open_end_position == "."):
-                open_path = self.identify_blocked_square(alg_start_coordinate, alg_end_coordinate, direction, board)
+                # Checks if path is blocked
+                open_path = Pieces.identify_blocked_square(alg_start_coordinate, alg_end_coordinate, direction, board)
                 if open_path is True:
                     return True
 
-            # 2. Pawn starting on non-home rank
+            # 2. Condition where pawn starts on non-home rank
             if (row_difference == 1) and (open_end_position == "."):
                 return True
 
-        # Check for valid capture: valid direction, distance, and end position
+        # Checks if capture moves are valid
+        # Checks direction, distance traveled, and end coordinate
         if (direction == "SOUTHEAST") or (direction == "SOUTHWEST"):
             occupied_end_position = board.get_piece_with_list_index([end_row, end_column])
             if (occupied_end_position != ".") and (total_difference == 2):
@@ -336,37 +375,49 @@ class Pieces:
 
         return False
 
-    def is_valid_move_for_pawn_white(self, alg_start_coordinate, alg_end_coordinate, board):
+    def is_valid_move_for_pawn_white(alg_start_coordinate, alg_end_coordinate, board):
         """
-        Purpose: Determines if it is valid for WHITE pawn to move to alg_end_coordinate
-        Parameters: alg_start_coordinate (pawn's current position),
-                    alg_end_coordinate (pawn's potential end position),
-                    board (instance of Board class)
-        Return value: (Boolean) True (move is valid) / False (move is invalid)
+        Checks if white pawn can move to alg_end_coordinate legally.
+
+        This method is a helper method for is_valid_move_for_pawn().
+        Rules for pawn moves vary depending on whether the pawn is capturing another piece.
+
+        Args:
+            alg_start_coordinate (str): Pawn's current position.
+            alg_end_coordinate (str): Pawn's potential end position.
+            board (Board): Instance of the current board state.
+
+        Returns:
+            True or False (bool): Indicates if move is valid or invalid.
         """
+        # Calculates distance traveled between start and end coordinates
         start_row, start_column = board.alg_coordinate_to_list_index(alg_start_coordinate)
         end_row, end_column = board.alg_coordinate_to_list_index(alg_end_coordinate)
-
-        row_difference, column_difference = self.row_column_difference(end_row, start_row, end_column, start_column)
-
+        row_difference, column_difference = Pieces.row_column_difference(end_row, start_row, end_column, start_column)
         total_difference = row_difference + column_difference
-        direction = self.identify_direction(alg_start_coordinate, alg_end_coordinate, board)
 
-        # Check for valid non-capture: valid direction, distance, and end position
+        # Identifies direction of move
+        direction = Pieces.identify_direction(alg_start_coordinate, alg_end_coordinate, board)
+
+        # Checks if non-capture moves are valid
+        # Checks direction, distance traveled, and end coordinate
+        # Square represented by end coordinate must be empty
         if direction == "NORTH":
             open_end_position = board.get_piece_with_list_index([end_row, end_column])
 
-            # Check that distance traveled is valid & pawn is NOT capturing
-            # 1. Pawn starting on home rank
+            # 1. Condition where pawn starts on home rank
             if (row_difference == 2) and (start_row == 6) and (open_end_position == "."):
-                open_path = self.identify_blocked_square(alg_start_coordinate, alg_end_coordinate, direction, board)
+                # Checks if path is blocked
+                open_path = Pieces.identify_blocked_square(alg_start_coordinate, alg_end_coordinate, direction, board)
                 if open_path is True:
                     return True
-            # 2. Pawn starting on non-home rank
+
+            # 2. Condition where pawn starts on non-home rank
             if (row_difference == 1) and (open_end_position == "."):
                 return True
 
-        # Check for valid capture: valid direction, distance, and end position
+        # Checks if capture moves are valid
+        # Checks direction, distance traveled, and end coordinate
         if (direction == "NORTHEAST") or (direction == "NORTHWEST"):
             occupied_end_position = board.get_piece_with_list_index([end_row, end_column])
             if (occupied_end_position != ".") and (total_difference == 2):
@@ -374,109 +425,160 @@ class Pieces:
 
         return False
 
-    def is_valid_move_for_falcon(self, alg_start_coordinate, alg_end_coordinate, chess_var):
+    def is_valid_move_for_falcon(alg_start_coordinate, alg_end_coordinate, chess_var):
         """
-        Purpose: Determines if it is valid for falcon to move to alg_end_coordinate
-        Parameters: alg_start_coordinate (falcon's current position),
-                    alg_end_coordinate (falcon's potential end position),
-                    board (instance of Board class)
-        Return value: (Boolean) True (move is valid) / False (move is invalid)
+        Checks if falcon can move to alg_end_coordinate legally.
+
+        This method calls helper methods is_valid_move_for_falcon_white() or is_valid_move_for_falcon_black().
+
+        Args:
+            alg_start_coordinate (str): Falcon's current position.
+            alg_end_coordinate (str): Falcon's potential end position.
+            chess_var (ChessVar): Instance of the current game state.
+
+        Returns:
+            True or False (bool): Indicates if move is valid or invalid.
         """
         board = chess_var.get_board()
         player_turn = chess_var.get_player_turn()
+
+        # Calls helper method based on player_turn
         if player_turn == "WHITE":
-            return self.is_valid_move_for_falcon_white(alg_start_coordinate, alg_end_coordinate, board)
+            return Pieces.is_valid_move_for_falcon_white(alg_start_coordinate, alg_end_coordinate, board)
         else:
-            return self.is_valid_move_for_falcon_black(alg_start_coordinate, alg_end_coordinate, board)
+            return Pieces.is_valid_move_for_falcon_black(alg_start_coordinate, alg_end_coordinate, board)
 
-    def is_valid_move_for_falcon_white(self, alg_start_coordinate, alg_end_coordinate,  board):
+    def is_valid_move_for_falcon_white(alg_start_coordinate, alg_end_coordinate, board):
         """
-        Purpose: Determines if it is valid for white falcon to move to alg_end_coordinate
-        Parameters: alg_start_coordinate (falcon's current position),
-                    alg_end_coordinate (falcon's potential end position),
-                    board (instance of Board class)
-        Return value: (Boolean) True (move is valid) / False (move is invalid)
-        """
-        direction = self.identify_direction(alg_start_coordinate, alg_end_coordinate, board)
+        Checks if white falcon can move to alg_end_coordinate legally.
 
-        # Check valid direction
+        This method is a helper method for is_valid_move_for_falcon().
+
+        Args:
+            alg_start_coordinate (str): Falcon's current position.
+            alg_end_coordinate (str): Falcon's potential end position.
+            board (Board): Instance of the current board state.
+
+        Returns:
+            True or False (bool): Indicates if move is valid or invalid.
+        """
+        # Checks direction of move
+        direction = Pieces.identify_direction(alg_start_coordinate, alg_end_coordinate, board)
         if direction not in ["NORTHWEST", "NORTHEAST", "SOUTH"]:
             return False
 
-        # Check open path
-        open_path = self.identify_blocked_square(alg_start_coordinate, alg_end_coordinate, direction, board)
+        # Checks if path is blocked
+        open_path = Pieces.identify_blocked_square(alg_start_coordinate, alg_end_coordinate, direction, board)
         if open_path is False:
             return False
+
         return True
 
-    def is_valid_move_for_falcon_black(self, alg_start_coordinate, alg_end_coordinate,  board):
+    def is_valid_move_for_falcon_black(alg_start_coordinate, alg_end_coordinate, board):
         """
-        Purpose: Determines if it is valid for black falcon to move to alg_end_coordinate
-        Parameters: alg_start_coordinate (falcon's current position),
-                    alg_end_coordinate (falcon's potential end position),
-                    board (instance of Board class)
-        Return value: (Boolean) True (move is valid) / False (move is invalid)
-        """
-        direction = self.identify_direction(alg_start_coordinate, alg_end_coordinate, board)
+        Checks if black falcon can move to alg_end_coordinate legally.
 
-        # Check valid direction
+        This method is a helper method for is_valid_move_for_falcon().
+
+        Args:
+            alg_start_coordinate (str): Falcon's current position.
+            alg_end_coordinate (str): Falcon's potential end position.
+            board (Board): Instance of the current board state.
+
+        Returns:
+            True or False (bool): Indicates if move is valid or invalid.
+        """
+        # Checks direction of move
+        direction = Pieces.identify_direction(alg_start_coordinate, alg_end_coordinate, board)
         if direction not in ["SOUTHWEST", "SOUTHEAST", "NORTH"]:
             return False
 
-        # Check open path
-        open_path = self.identify_blocked_square(alg_start_coordinate, alg_end_coordinate, direction, board)
+        # Checks if path is blocked
+        open_path = Pieces.identify_blocked_square(alg_start_coordinate, alg_end_coordinate, direction, board)
         if open_path is False:
             return False
+
         return True
 
-    def is_valid_move_for_hunter(self, alg_start_coordinate, alg_end_coordinate, chess_var):
+    def is_valid_move_for_hunter(alg_start_coordinate, alg_end_coordinate, chess_var):
         """
-        Purpose: Determines if it is valid for hunter to move to alg_end_coordinate
-        Parameters: alg_start_coordinate (hunter's current position),
-                    alg_end_coordinate (hunter's potential end position),
-                    board (instance of Board class)
-        Return value: (Boolean) True (move is valid) / False (move is invalid)
+        Checks if hunter can move to alg_end_coordinate legally.
+
+        This method calls helper methods is_valid_move_for_hunter_white() or is_valid_move_for_hunter_black().
+
+        Args:
+            alg_start_coordinate (str): Hunter's current position.
+            alg_end_coordinate (str): Hunter's potential end position.
+            chess_var (ChessVar): Instance of the current game state.
+
+        Returns:
+            True or False (bool): Indicates if move is valid or invalid.
         """
         board = chess_var.get_board()
         player_turn = chess_var.get_player_turn()
+
+        # Calls helper method based on player_turn
         if player_turn == "WHITE":
-            return self.is_valid_move_for_hunter_white(alg_start_coordinate, alg_end_coordinate, board)
+            return Pieces.is_valid_move_for_hunter_white(alg_start_coordinate, alg_end_coordinate, board)
         else:
-            return self.is_valid_move_for_hunter_black(alg_start_coordinate, alg_end_coordinate, board)
+            return Pieces.is_valid_move_for_hunter_black(alg_start_coordinate, alg_end_coordinate, board)
 
-    def is_valid_move_for_hunter_white(self, alg_start_coordinate, alg_end_coordinate, board):
+    def is_valid_move_for_hunter_white(alg_start_coordinate, alg_end_coordinate, board):
         """
-        Purpose: Determines if it is valid for white hunter to move to alg_end_coordinate
-        Parameters: alg_start_coordinate (hunter's current position),
-                    alg_end_coordinate (hunter's potential end position),
-                    board (instance of Board class)
-        Return value: (Boolean) True (move is valid) / False (move is invalid)
-        """
-        return self.is_valid_move_for_falcon_black(alg_start_coordinate, alg_end_coordinate, board)
+        Checks if white hunter can move to alg_end_coordinate legally.
 
-    def is_valid_move_for_hunter_black(self, alg_start_coordinate, alg_end_coordinate, board):
-        """
-        Purpose: Determines if it is valid for black hunter to move to alg_end_coordinate
-        Parameters: alg_start_coordinate (hunter's current position),
-                    alg_end_coordinate (hunter's potential end position),
-                    board (instance of Board class)
-        Return value: (Boolean) True (move is valid) / False (move is invalid)
-        """
-        return self.is_valid_move_for_falcon_white(alg_start_coordinate, alg_end_coordinate, board)
+        This method is a helper method for is_valid_move_for_hunter().
+        The white hunter follows the same rules as the black falcon.
+        Therefore, is_valid_move_for_falcon_black() is called.
 
-    def identify_direction(self, alg_start_coordinate, alg_end_coordinate, board):
+        Args:
+            alg_start_coordinate (str): Hunter's current position.
+            alg_end_coordinate (str): Hunter's potential end position.
+            board (Board): Instance of the current board state.
+
+        Returns:
+            True or False (bool): Indicates if move is valid or invalid.
         """
-        Purpose: Determines the direction from alg_start_coord to alg_end_coord
-        Parameters: alg_start_coordinate (start point),
-                    alg_end_coordinate (end point),
-                    board (instance of Board class)
-        Return value: (string) 'NORTH', 'NORTHEAST', 'EAST', 'SOUTHEAST',
-                      'SOUTH', 'SOUTHWEST', 'WEST', 'NORTHWEST'
+        return Pieces.is_valid_move_for_falcon_black(alg_start_coordinate, alg_end_coordinate, board)
+
+    def is_valid_move_for_hunter_black(alg_start_coordinate, alg_end_coordinate, board):
         """
+        Checks if black hunter can move to alg_end_coordinate legally.
+
+        This method is a helper method for is_valid_move_for_hunter().
+        The black hunter follows the same rules as the white falcon.
+        Therefore, is_valid_move_for_falcon_white() is called.
+
+        Args:
+            alg_start_coordinate (str): Hunter's current position.
+            alg_end_coordinate (str): Hunter's potential end position.
+            board (Board): Instance of the current board state.
+
+        Returns:
+            True or False (bool): Indicates if move is valid or invalid.
+        """
+        return Pieces.is_valid_move_for_falcon_white(alg_start_coordinate, alg_end_coordinate, board)
+
+    def identify_direction(alg_start_coordinate, alg_end_coordinate, board):
+        """
+        Determines the direction from start to end coordinate.
+
+        Each type of chess piece can only travel in a certain direction(s).
+        This method is called by other Piece methods that responsible for
+        validating moves, like is_valid_move_for_king().
+
+        Args:
+            alg_start_coordinate (str): Start position of chess piece.
+            alg_end_coordinate (str): End position of chess piece.
+            board (Board): Instance of the current board state.
+
+        Returns:
+            (str): Cardinal or ordinal direction
+        """
+        # Checks for cardinal direction
         start_row, start_column = board.alg_coordinate_to_list_index(alg_start_coordinate)
         end_row, end_column = board.alg_coordinate_to_list_index(alg_end_coordinate)
 
-        # Identify vertical and horizontal direction
         if start_column == end_column:
             if end_row - start_row > 0:
                 return 'SOUTH'
@@ -489,11 +591,10 @@ class Pieces:
             else:
                 return 'WEST'
 
-        # Calculate differences without taking absolute value
+        # Checks for ordinal direction
         row_difference = end_row - start_row
         column_difference = end_column - start_column
 
-        # Identify diagonal direction
         if abs(row_difference) == abs(column_difference):
             if (row_difference < 0) and (column_difference) > 0:
                 return 'NORTHEAST'
@@ -504,23 +605,29 @@ class Pieces:
             elif (row_difference > 0) and (column_difference > 0):
                 return 'SOUTHEAST'
 
-        # Invalid direction
+        # Invalid direction (not cardinal or ordinal)
         return 'N/A'
 
-    def identify_blocked_square(self, alg_start_coordinate, alg_end_coordinate, direction, board):
+    def identify_blocked_square(alg_start_coordinate, alg_end_coordinate, direction, board):
         """
-        Purpose: For pieces that cannot jump — determines if a piece is blocking the path from
-                 alg_start_coord to alg_end_coord
-        Parameters: alg_start_coordinate (start point),
-                    alg_end_coordinate (end point),
-                    board (instance of Board class),
-                    direction (direction of the path to check)
-        Return value: True (move is valid) / False (move is invalid)
+        Determines if any chess piece blocks the path from start to end coordinate.
+
+        This method is called by other Piece methods that
+        validate moves for chess pieces that cannot jump, like is_valid_move_for_queen().
+
+        Args:
+            alg_start_coordinate (str): Start position of chess piece.
+            alg_end_coordinate (str): End position of chess piece.
+            direction (str): Direction chess piece will move in.
+            board (Board): Instance of the current board state.
+
+        Returns:
+            True or False (bool): Indicates if path is unblocked or blocked
         """
         start_row, start_column = board.alg_coordinate_to_list_index(alg_start_coordinate)
         end_row, end_column = board.alg_coordinate_to_list_index(alg_end_coordinate)
 
-        # Check blockages for vertical and horizontal directions
+        # Checks blockages for cardinal directions
         if direction == 'NORTH':
             for row in range(start_row-1, end_row, -1):
                 if board.get_piece_with_list_index([row, start_column]) != ".":
@@ -543,7 +650,7 @@ class Pieces:
 
         num_of_checked_squares = abs(end_row - start_row) - 1
 
-        # Check blockages for diagonal directions
+        # Checks blockages for ordinal directions
         if direction == 'NORTHEAST':
             for square in range(num_of_checked_squares):
                 start_row = start_row - 1
@@ -574,29 +681,53 @@ class Pieces:
 
         return True
 
-    def row_column_difference(self, end_row, start_row, end_column, start_column):
+    def row_column_difference(end_row, start_row, end_column, start_column):
+        """
+        Calculates differences between row indexes and column indexes.
+
+        Some types of chess piece can only travel a specific distance.
+        This method is called by other Piece methods to validate moves for chess pieces,
+        like is_valid_move_for_king().
+
+        Args:
+            end_row (int): Index of row of end coordinate
+            start_row (int): Index of row of start coordinate
+            end_column (int): Index of column of end coordinate
+            start_column (int): Index of column of start coordinate
+
+        Returns:
+            row_diff, column_diff (tuple): Represents row and column differences
+        """
         row_diff = abs(end_row - start_row)
         column_diff = abs(end_column - start_column)
         return row_diff, column_diff
 
 class Board:
-    """Responsibility: Represents a board the chess game is played on, with methods for
-                       placing, removing, and retrieving pieces on the board
-       Communicates with:
-       ChessVar class — an instance of Board is declared as a private member in ChessVar, so players have a
-       "board" to play on
-       Pieces class — several Pieces methods accept an instance of Board as an argument
+    """
+        A class representing a chess board.
+
+        This class has methods for placing, removing, and retrieving chess pieces on a board.
+        It communicates with:
+        ChessVar class — Has 1 Board instance declared as an attribute.
+
+        Attributes:
+            _board_display (list): Grid with rows and columns.
+            _letter_to_column_dict (dict): Maps each letter to its corresponding column index in _board_display.
+            _number_to_row_dict (dict): Maps each number to its corresponding row index in _board_display.
     """
 
     def __init__(self):
-        """Purpose: Initialize an instance of board, with
-           self._board_display initialized with starting positions of all pieces,
-           except reserve falcon and hunter
-           Parameters: None
-           Return value: None
         """
-        # Lowercase letters: BLACK pieces
-        # Uppercase letters: WHITE pieces
+        Initializes a new Board instance.
+
+        _board_display is initialized with the white and black chess pieces in their starting positions.
+        This method does not require any arguments.
+
+        Returns:
+            None
+        """
+        # Lowercase letters represent black pieces
+        # Uppercase letters represent white pieces
         self._board_display = [
         ['8','r','n','b','q','k','b','n','r'],
         ['7','p','p','p','p','p','p','p','p'],
@@ -608,7 +739,6 @@ class Board:
         ['1','R','N','B','Q','K','B','N','R'],
         [' ','a','b','c','d','e','f','g','h']]
 
-        # Dictionaries used in alg_coordinate_to_list_index method
         self._letter_to_column_dict = {
             'a': 1, 'b': 2, 'c': 3, 'd': 4,
             'e': 5, 'f': 6, 'g': 7, 'h': 8
@@ -619,9 +749,13 @@ class Board:
         }
 
     def get_board_display(self):
-        """Purpose: Get self._board_display
-           Parameters: None
-           Return value: self._board_display
+        """
+        Retrieves _board_display.
+
+        This method does not require any arguments.
+
+        Returns:
+            _board_display (list): Grid with rows and columns.
         """
         return self._board_display
 
@@ -716,7 +850,6 @@ class ChessVar:
            Parameters:
            Return value:
         """
-        self._pieces = Pieces()
         self._board = Board()
         self._white = Player(['F', 'H'])
         self._black = Player(['f', 'h'])
@@ -885,23 +1018,23 @@ class ChessVar:
 
         # Call the Piece class method that corresponds to the chosen piece
         if piece == 'R':
-            return self._pieces.is_valid_move_for_rook(alg_start_coordinate, alg_end_coordinate, self)
+            return Pieces.is_valid_move_for_rook(alg_start_coordinate, alg_end_coordinate, self)
         elif piece == 'B':
-            return self._pieces.is_valid_move_for_bishop(alg_start_coordinate, alg_end_coordinate, self)
+            return Pieces.is_valid_move_for_bishop(alg_start_coordinate, alg_end_coordinate, self)
         elif piece == 'Q':
-            return self._pieces.is_valid_move_for_queen(alg_start_coordinate, alg_end_coordinate, self)
+            return Pieces.is_valid_move_for_queen(alg_start_coordinate, alg_end_coordinate, self)
         elif piece == 'N':
-            return self._pieces.is_valid_move_for_knight(alg_start_coordinate, alg_end_coordinate, self)
+            return Pieces.is_valid_move_for_knight(alg_start_coordinate, alg_end_coordinate, self)
         elif piece == 'K':
-            return self._pieces.is_valid_move_for_king(alg_start_coordinate, alg_end_coordinate, self)
+            return Pieces.is_valid_move_for_king(alg_start_coordinate, alg_end_coordinate, self)
         elif piece == 'P':
-            return self._pieces.is_valid_move_for_pawn(alg_start_coordinate, alg_end_coordinate,
+            return Pieces.is_valid_move_for_pawn(alg_start_coordinate, alg_end_coordinate,
                                                        self)
         elif piece == 'F':
-            return self._pieces.is_valid_move_for_falcon(alg_start_coordinate, alg_end_coordinate,
+            return Pieces.is_valid_move_for_falcon(alg_start_coordinate, alg_end_coordinate,
                                                        self)
         elif piece == 'H':
-            return self._pieces.is_valid_move_for_hunter(alg_start_coordinate, alg_end_coordinate,
+            return Pieces.is_valid_move_for_hunter(alg_start_coordinate, alg_end_coordinate,
                                                          self)
 
     def enter_fairy_piece(self, fairy_piece_type, placement_square):
