@@ -711,7 +711,7 @@ class Board:
         ChessVar class — Has 1 Board instance declared as an attribute.
 
         Attributes:
-            _board_display (list): Grid with rows and columns.
+            _board_display (list): Chess board (a grid) with rows and columns.
             _letter_to_column_dict (dict): Maps each letter to its corresponding column index in _board_display.
             _number_to_row_dict (dict): Maps each number to its corresponding row index in _board_display.
     """
@@ -728,6 +728,7 @@ class Board:
         """
         # Lowercase letters represent black pieces
         # Uppercase letters represent white pieces
+        # "." represents an empty square
         self._board_display = [
         ['8','r','n','b','q','k','b','n','r'],
         ['7','p','p','p','p','p','p','p','p'],
@@ -760,16 +761,25 @@ class Board:
         return self._board_display
 
     def set_board_display(self, board_display):
-        """Purpose: Set ._board_display
-           Parameters: None
-           Return value: None
+        """
+        Sets _board_display.
+
+        Args:
+            board_display (list): Grid with rows and columns.
+
+        Returns:
+            None
         """
         self._board_display = board_display
 
     def print_board_display(self):
-        """Purpose: Print ._board_display
-           Parameters: None
-           Return value: None
+        """
+        Prints _board_display.
+
+        This method does not require any arguments.
+
+        Returns:
+            None
         """
         for row in range(9):
             row_string = "  ".join(self._board_display[row])
@@ -777,16 +787,18 @@ class Board:
 
     def alg_coordinate_to_list_index(self, alg_coordinate):
         """
-        Purpose: Convert algebraic coordinates to a list index that can be used to access
-                 ._board_display
-        Parameters: alg_coordinate
-        Return value: list with row index and column index [row, column]
-        """
-        # Split string into letter, number
-        letter = alg_coordinate[0]
-        number = alg_coordinate[1]
+        Converts algebraic coordinates to a row index and column index.
 
-        # Create list index
+        Players will reference squares on the chess board by their algebraic coordinates.
+        To access _board_display, these coordinates must be converted to a row index and column index.
+
+        Args:
+            alg_coordinate (str): Represents a square on the board.
+
+        Returns:
+            row, column (tuple): Row index and column index.
+        """
+        letter, number = alg_coordinate
         try:
             column = self._letter_to_column_dict[letter]
             row = self._number_to_row_dict[number]
@@ -797,58 +809,88 @@ class Board:
 
     def place_piece(self, alg_coordinate, piece):
         """
-        Purpose: Place piece in alg_coordinate position
-        Parameters: alg_coordinate
-        Return value: None
+        Places piece on chess board.
+
+        Args:
+            alg_coordinate (str): Square where piece will be placed.
+            piece (str): Piece that will be placed.
+
+        Returns:
+            None
         """
         row, column = self.alg_coordinate_to_list_index(alg_coordinate)
         self._board_display[row][column] = piece
 
     def remove_piece(self, alg_coordinate):
         """
-        Purpose: Remove piece by setting alg_coordinate position to "."
-        Parameters: alg_coordinate
-        Return value: None
+        Removes piece from chess board.
+
+        Args:
+            alg_coordinate (str): Square where piece should be removed from.
+
+        Returns:
+            None
         """
         row, column = self.alg_coordinate_to_list_index(alg_coordinate)
         self._board_display[row][column] = '.'
 
     def get_piece(self, alg_coordinate):
         """
-        Purpose: Identify piece in target position
-        Parameters: alg_coordinate
-        Return value: "." or letter that represents the piece in the position
+        Retrieves piece from chess board without removing.
+
+        Args:
+            alg_coordinate (str): Square where piece should be retrieved from.
+
+        Returns:
+            piece (str): Piece on requested square, or "." if square is empty.
         """
         row, column = self.alg_coordinate_to_list_index(alg_coordinate)
         piece = self._board_display[row][column]
-
         return piece
 
     def get_piece_with_list_index(self, list_index):
         """
-        Purpose: Identify piece in target position
-        Parameters: alg_coordinate
-        Return value: "." or letter that represents the piece in the position
+        Retrieves piece from chess board using row index and column index.
+
+        Args:
+            list_index (str): Square where piece should be retrieved from.
+
+        Returns:
+            piece (str): Piece on board, or "." if requested square is empty.
         """
         row, column = list_index
         piece = self._board_display[row][column]
-
         return piece
 
 class ChessVar:
-    """Responsibility: Represents one round of a chess-variation game,
-       with methods to determine game state, player turns, and make moves
-       Communicates with:
-       Board class — an instance of Board is declared as a private member
-       in ChessVar so players have a "board" to play on
-       Pieces class — an instance of Pieces is declared as a private member
-       in ChessVar to determine if a move entered by the player is valid
+    """
+    A class representing one round of a chess-variation game.
+
+    This class has methods to determine game state, player turns, and execute player moves.
+    It communicates with:
+    Board class — described in Attributes.
+    Player class — describe in Attributes.
+
+    Attributes:
+        _reserve_list (list): A list of fairy pieces that are available for use.
+        _board (Board): An instance of Board that the chess game is played on.
+        _white (Player): An instance of Player that represents the white-piece player.
+        _black (Player): An instance of Player that represents the black-piece player.
+        _player_turn (str): Indicates player turn.
+        _game_state (str): Indicates game state.
+        _white_pieces (list): List of white chess pieces.
+        _black_pieces (list): List of black chess pieces.
     """
 
     def __init__(self):
-        """Purpose: Initialize private board, player_turn, and game_state
-           Parameters:
-           Return value:
+        """
+        Initializes a new ChessVar instance.
+
+        This method does not require any arguments.
+        The white-piece player has the first turn.
+
+        Returns:
+            None
         """
         self._board = Board()
         self._white = Player(['F', 'H'])
@@ -859,98 +901,131 @@ class ChessVar:
         self._black_pieces = ['p', 'r', 'n', 'b', 'q', 'k', 'f', 'h']
 
     def get_board(self):
-        """Purpose: Returns ._board
-           Parameters: None
-           Return value: ._board
+        """
+        Retrieves _board.
+
+        This method does not require any arguments.
+
+        Returns:
+            _board (Board): Board chess game is played on.
         """
         return self._board
 
     def get_game_state(self):
-        """Purpose: Returns ._game_state
-           Parameters: None
-           Return value: (string) 'UNFINISHED', 'WHITE_WON', or 'BLACK_WON'
+        """
+        Retrieves _game_state.
+
+        This method does not require any arguments.
+
+        Returns:
+            _game_state (str): Indicates game state.
         """
         return self._game_state
 
     def set_game_state(self, game_state):
-        """Purpose: Sets ._game_state
-           Parameters: None
-           Return value: None
+        """
+        Sets _game_state.
+
+        Args:
+            _game_state (str): Indicates game state.
+
+        Returns:
+            None
         """
         self._game_state = game_state
 
     def get_player_turn(self):
-        """Purpose: Returns ._game_state
-           Parameters: None
-           Return value: (string) 'WHITE' or 'BLACK'
+        """
+        Retrieves _player_turn.
+
+        This method does not require any arguments.
+
+        Returns:
+            _player_turn (str): Indicates player turn.
         """
         return self._player_turn
 
-    def make_move(self, alg_start_coordinate, alg_end_coordinate):
-        """Purpose: Moves piece from alg_start_coordinate to alg_end_coordinate if allowed
-           Parameters: alg_start_coordinate (current position of piece to be moved)
-                       alg_end_coordinate (position to move piece to)
-           Return value: (Boolean) True or False
+    def set_player_turn(self, color):
         """
-        #1: Check several conditions for coordinates
+        Sets _player_turn.
+
+        Args:
+            color (str): Player that has the current turn.
+
+        Returns:
+            None
+        """
+        self._player_turn = color
+
+    def make_move(self, alg_start_coordinate, alg_end_coordinate):
+        """
+        Moves chess piece from start to end coordinate if allowed.
+
+        Args:
+            alg_start_coordinate (str): Piece's current position.
+            alg_end_coordinate (str): Piece's potential end position.
+
+        Returns:
+            True or False (bool): Indicates if move was successful or unsuccessful.
+        """
+        # Checks several conditions for coordinates
         if self.verify_player_square(alg_start_coordinate, alg_end_coordinate) is False:
             return False
 
-        #2: Check if ._game_state is unfinished
+        # Checks if _game_state is unfinished
         if self.get_game_state() != "UNFINISHED":
             return False
 
-        #3: Check if move is valid
+        # Checks if move is valid
         piece = self._board.get_piece(alg_start_coordinate)
         valid_move = self.is_valid_move(piece, alg_start_coordinate, alg_end_coordinate)
         if valid_move is False:
             return False
 
-        # Capture opponent piece
+        # Captures opponent piece, places player piece, and resets start position to be empty
         captured_piece = self._board.get_piece(alg_end_coordinate)
         self._board.remove_piece(alg_end_coordinate)
-        # Place new piece
         self._board.place_piece(alg_end_coordinate, piece)
-        # Reset alg_start_coordinate to "."
         self._board.remove_piece(alg_start_coordinate)
 
-        # Update fairy piece state
+        # Updates variables related to fairy pieces, _game_state, _player_turn
         self.determine_fairy_piece(captured_piece)
-        # Update game state
         self.determine_winner(captured_piece)
-        # Update turn
         self.update_player_turn()
         return True
 
-
     def verify_player_square(self, alg_start_coordinate, alg_end_coordinate):
         """
-        Purpose: Checks several conditions for start and end coordinates
-        Parameters: alg_coordinate
-        Return value: True or False
+        Checks that start and end coordinates are valid.
+
+        Args:
+            alg_start_coordinate (str): Piece's current position.
+            alg_end_coordinate (str): Piece's potential end position.
+
+        Returns:
+            True or False (bool): Indicates if coordinates are valid or invalid.
         """
-        #1: Check if start and end_coordinate are the same
+        # Checks if start and end coordinates are the same
         if alg_start_coordinate == alg_end_coordinate:
             return False
 
-        #2: Check if coordinates are off the grid
+        # Checks if coordinates are out of bounds
         start_on_grid = self._board.alg_coordinate_to_list_index(alg_start_coordinate)
         end_on_grid = self._board.alg_coordinate_to_list_index(alg_end_coordinate)
-
         if (start_on_grid == [False, False]) or (end_on_grid == [False, False]):
             return False
 
-        # Retrieve pieces
+        # Retrieves pieces from coordinates
         start_piece = self._board.get_piece(alg_start_coordinate)
         end_piece = self._board.get_piece(alg_end_coordinate)
 
-        #3: Check if start_piece is empty
+        # Checks if start_piece is empty
         if start_piece == ".":
             return False
 
-        #4: Check conditions dependent on player and piece color
-        # Check if start_piece belongs to opponent
-        # Check if end_piece belongs to current player
+        # Checks conditions related to player and piece color
+        # Checks if start_piece belongs to current player
+        # Checks if end_piece, if there is any, belongs to opponent
         if self._player_turn == "WHITE":
            if (start_piece not in self._white_pieces) or (end_piece in self._white_pieces):
                return False
@@ -964,45 +1039,53 @@ class ChessVar:
 
     def determine_fairy_piece(self, captured_piece):
         """
-        Purpose: Call Player class update_fairy_piece_entry
-        Parameters: captured_piece
-        Return value: None
-        """
+        Updates Player's _fairy_piece_entry and _capture_count.
 
-        # White piece captured black main piece, so update black fairy piece status
+        This method is called whenever a player's queen, rook, bishop, or knight is captured.
+        When one of these pieces is taken, it allows the player to introduce a fairy piece.
+
+        Args:
+            captured_piece (str): Piece that was captured.
+
+        Returns:
+            None
+        """
+        # Updates _black fairy piece variables because black piece has been captured
         if (self._player_turn == "WHITE") and (captured_piece in ['q', 'r', 'b', 'n']):
             self._black.update_capture_count(1)
             self._black.update_fairy_piece_entry()
 
-        # Black piece captured white main piece, so update white fairy piece status
+        # Updates _white fairy piece variables because white piece has been captured
         if (self._player_turn == "BLACK") and (captured_piece in ['Q', 'R', 'B', 'N']):
             self._white.update_capture_count(1)
             self._white.update_fairy_piece_entry()
 
     def determine_winner(self, captured_piece):
         """
-        Purpose: Call set_game_state
-        Parameters: captured_piece
-        Return value: None
+        Updates _game_state if the game has a winner.
+
+        This method is called whenever a player's king is captured.
+
+        Args:
+            captured_piece (str): Piece that was captured.
+
+        Returns:
+            None
         """
         if captured_piece == 'k':
             self._game_state = "WHITE_WON"
         elif captured_piece == 'K':
             self._game_state = "BLACK_WON"
 
-    def set_player_turn(self, color):
-        """
-        Purpose: Set ._player_turn
-        Parameters: None
-        Return value: None
-        """
-        self._player_turn = color
-
     def update_player_turn(self):
         """
-        Purpose: Update ._player_turn by calling set_player_turn
-        Parameters: None
-        Return value: None
+        Updates _player_turn.
+
+        This method is called whenever a player has finished their turn.
+        This method does not require any arguments.
+
+        Returns:
+            None
         """
         if self._player_turn == "WHITE":
             self._player_turn = "BLACK"
@@ -1010,13 +1093,22 @@ class ChessVar:
             self._player_turn = "WHITE"
 
     def is_valid_move(self, piece, alg_start_coordinate, alg_end_coordinate):
-        """Purpose: Checks if valid for piece to move from start to end position
-           Parameters: piece, alg_start_coordinate (start position), alg_end_coordinate (end_position)
-           Return value: True or False
+        """
+        Checks if piece is allowed to move from start to end coordinate.
+
+        This method is called whenever a player makes a move.
+
+        Args:
+            piece (str): Piece that will be moved.
+            alg_start_coordinate (str): Start position of piece.
+            alg_end_coordinate (str): Potential end position of piece.
+
+        Returns:
+            True or False (bool): Indicates if move is valid or invalid.
         """
         piece = piece.upper()
 
-        # Call the Piece class method that corresponds to the chosen piece
+        # Calls the Pieces method that will validate the move of the piece
         if piece == 'R':
             return Pieces.is_valid_move_for_rook(alg_start_coordinate, alg_end_coordinate, self)
         elif piece == 'B':
@@ -1038,70 +1130,88 @@ class ChessVar:
                                                          self)
 
     def enter_fairy_piece(self, fairy_piece_type, placement_square):
-        """Purpose: Determines if fairy piece can be entered onto the board
-           Parameters: piece_type (string), placement_square (algebraic coordinates)
-           Return value: True or False
         """
-        # Perform initial checks
+        Places the fairy piece on the board if it is allowed.
+
+        Args:
+            fairy_piece_type (str): Fairy piece that will be placed.
+            placement_square (str): Square where fairy piece will be placed.
+
+        Returns:
+            True or False (bool): Indicates if placement is valid or invalid.
+        """
+        # Performs initial checks
         if self.verify_fairy_piece_and_position(fairy_piece_type, placement_square) is False:
             return False
 
+        # Checks if player is allowed to place a fairy piece
         if self._player_turn == "WHITE":
             if self._white.get_fairy_piece_entry() is False:
                 return False
             else:
+                # Updates self._white attributes
                 self.fairy_piece_actions(self._white, fairy_piece_type)
 
         if self._player_turn == "BLACK":
             if self._black.get_fairy_piece_entry() is False:
                 return False
             else:
+                # Updates self._black attributes
                 self.fairy_piece_actions(self._black, fairy_piece_type)
 
-        # Place fairy piece
+        # Places fairy piece, updates turn
         self._board.place_piece(placement_square, fairy_piece_type)
-        # Update turn
         self.update_player_turn()
         return True
 
     def fairy_piece_actions(self, player, piece):
-        """Purpose: Determines if fairy piece can be entered onto the board
-           Parameters: piece_type (string), placement_square (algebraic coordinates)
-           Return value: True or False
         """
+        Updates Player attributes when a fairy piece is about to be placed.
 
-        # Remove in-play fairy piece from reserve list
+        Args:
+            player (Player): Player that will place the piece.
+            piece (str): Fairy piece that will be placed.
+
+        Returns:
+            None
+        """
+        # Removes fairy piece from reserve list because it will be placed
         player.remove_from_reserve_list(piece)
 
-        # Decrement capture count
+        # Decrements _capture_count
         player.update_capture_count(-1)
         player.update_fairy_piece_entry
 
     def verify_fairy_piece_and_position(self, fairy_piece_type, placement_square):
-        """Purpose: Performs initial checks for enter_fairy_piece
-           Parameters: piece_type (string), placement_square (algebraic coordinates)
-           Return value: True or False
         """
-        row, column = self._board.alg_coordinate_to_list_index(placement_square)
+        Checks if the fairy piece and its placement are valid.
 
-        # Placement square is off board
+        Args:
+            fairy_piece_type (str): Fairy piece that will be placed.
+            placement_square (str): Square where fairy piece will be placed.
+
+        Returns:
+            True or False (bool): Indicates if placement is valid or invalid.
+        """
+
+        # Checks if placement square is out of bounds
+        row, column = self._board.alg_coordinate_to_list_index(placement_square)
         if [row, column] == [False, False]:
             return False
 
-        # Perform initial checks
-        # WHITE
+        # Checks for white-piece player
         if self._player_turn == "WHITE":
-            # Check if fairy piece placed on home rank
+            # Checks if placement_square is in home rank
             if row not in [6, 7]:
                 return False
-            # Check if placement_square is empty
+            # Checks if placement_square is empty
             if (self._board.get_piece_with_list_index([row, column]) != "."):
                 return False
-            # Check if fairy_piece_type is valid
+            # Checks if fairy_piece_type is valid
             if fairy_piece_type not in self._white.get_reserve_list():
                 return False
 
-        # BLACK
+        # Checks for black-piece player
         if self._player_turn == "BLACK":
             if row not in [0, 1]:
                 return False
