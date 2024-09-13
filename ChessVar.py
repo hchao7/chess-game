@@ -1222,3 +1222,13 @@ class ChessVar:
 
         return True
 
+def play_chess_game(game):
+    while game.get_game_state() == "UNFINISHED":
+        print(game.get_player_turn(), "TURN:")
+        start, end, fairy = input("Enter move (start/end/fairy): ").split("/")
+        if fairy == 'x':
+            game.make_move(start, end)
+        else:
+            game.enter_fairy_piece(start, fairy)
+
+    print(game.get_game_state())
