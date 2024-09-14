@@ -1229,6 +1229,6 @@ def play_chess_game(game):
         if fairy == 'x':
             game.make_move(start, end)
         else:
-            game.enter_fairy_piece(start, fairy)
+            game.enter_fairy_piece(fairy, start)
 
     print(game.get_game_state())
