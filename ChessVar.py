@@ -17,7 +17,7 @@ class Player:
         _capture_count (int): The count of captured Queen, Rook, Bishop, and Knight pieces.
     """
 
-    def __init__(self, reserve_list):
+    def __init__(self, reserve_list, name="Player"):
         """
         Initializes a new Player instance.
 
@@ -30,6 +30,7 @@ class Player:
         self._reserve_list = reserve_list
         self._fairy_piece_entry = False
         self._capture_count = 0
+        self._name = name
 
     def set_capture_count(self, capture_count):
         """
@@ -115,6 +116,17 @@ class Player:
             _reserve_list (list): Fairy pieces assigned to player.
         """
         return self._reserve_list
+
+    def get_name(self):
+        """
+        Retrieves _name.
+
+        This method does not require any arguments.
+
+        Returns:
+            _name (str): Name of player.
+        """
+        return self._name
 
     def remove_from_reserve_list(self, fairy_piece):
         """
@@ -716,7 +728,7 @@ class Board:
             _number_to_row_dict (dict): Maps each number to its corresponding row index in _board_display.
     """
 
-    def __init__(self):
+    def __init__(self, board_display=None):
         """
         Initializes a new Board instance.
 
@@ -729,7 +741,8 @@ class Board:
         # Lowercase letters represent black pieces
         # Uppercase letters represent white pieces
         # "." represents an empty square
-        self._board_display = [
+        if board_display is None:
+            board_display = [
         ['8','r','n','b','q','k','b','n','r'],
         ['7','p','p','p','p','p','p','p','p'],
         ['6','.','.','.','.','.','.','.','.'],
@@ -740,6 +753,7 @@ class Board:
         ['1','R','N','B','Q','K','B','N','R'],
         [' ','a','b','c','d','e','f','g','h']]
 
+        self._board_display = board_display
         self._letter_to_column_dict = {
             'a': 1, 'b': 2, 'c': 3, 'd': 4,
             'e': 5, 'f': 6, 'g': 7, 'h': 8
@@ -772,18 +786,19 @@ class Board:
         """
         self._board_display = board_display
 
-    def print_board_display(self):
-        """
-        Prints _board_display.
-
-        This method does not require any arguments.
-
-        Returns:
-            None
-        """
-        for row in range(9):
-            row_string = "  ".join(self._board_display[row])
-            print(row_string)
+    # def print_board_display(self):
+    #     """
+    #     Prints _board_display.
+    #
+    #     This method does not require any arguments.
+    #
+    #     Returns:
+    #         None
+    #     """
+    #     print()
+    #     for row in range(9):
+    #         row_string = "    ".join(self._board_display[row])
+    #         print(row_string)
 
     def alg_coordinate_to_list_index(self, alg_coordinate):
         """
@@ -882,7 +897,7 @@ class ChessVar:
         _black_pieces (list): List of black chess pieces.
     """
 
-    def __init__(self):
+    def __init__(self, name_white="Player 1", name_black="Player 2", board_display=None):
         """
         Initializes a new ChessVar instance.
 
@@ -892,13 +907,27 @@ class ChessVar:
         Returns:
             None
         """
-        self._board = Board()
-        self._white = Player(['F', 'H'])
-        self._black = Player(['f', 'h'])
+        self._board = Board(board_display)
+        self._white = Player(['F', 'H'], name_white)
+        self._black = Player(['f', 'h'], name_black)
         self._player_turn = 'WHITE'
         self._game_state = 'UNFINISHED'
         self._white_pieces = ['P', 'R', 'N', 'B', 'Q', 'K', 'F', 'H']
         self._black_pieces = ['p', 'r', 'n', 'b', 'q', 'k', 'f', 'h']
+
+    def get_player(self, player):
+        """
+        Retrieves _white or _black.
+
+        This method does not require any arguments.
+
+        Returns:
+            _white or _black (Player): Instance of white-piece or black-piece Player
+        """
+        if player == "WHITE":
+            return self._white
+        else:
+            return self._black
 
     def get_board(self):
         """
@@ -907,7 +936,7 @@ class ChessVar:
         This method does not require any arguments.
 
         Returns:
-            _board (Board): Board chess game is played on.
+            _board (Board): Instance of Board the chess game is played on.
         """
         return self._board
 
@@ -956,6 +985,27 @@ class ChessVar:
             None
         """
         self._player_turn = color
+
+    def print_board_display(self):
+        """
+        Prints _board_display.
+
+        This method does not require any arguments.
+
+        Returns:
+            None
+        """
+        black_piece_player = self.get_player("BLACK")
+        white_piece_player = self.get_player("WHITE")
+        print("\n")
+        print(f"{' ' * 5}{black_piece_player.get_name()}: {black_piece_player.get_reserve_list()}")
+        print(f"{' ' * 18}BLACK")
+        for row in range(9):
+            row_string = "    ".join(self._board.get_board_display()[row])
+            print(row_string)
+        print(f"{' ' * 18}WHITE")
+        print(f"{' ' * 5}{white_piece_player.get_name()}: {white_piece_player.get_reserve_list()}")
+        print("\n")
 
     def make_move(self, alg_start_coordinate, alg_end_coordinate):
         """
@@ -1222,13 +1272,73 @@ class ChessVar:
 
         return True
 
-def play_chess_game(game):
-    while game.get_game_state() == "UNFINISHED":
-        print(game.get_player_turn(), "TURN:")
-        start, end, fairy = input("Enter move (start/end/fairy): ").split("/")
-        if fairy == 'x':
-            game.make_move(start, end)
-        else:
-            game.enter_fairy_piece(fairy, start)
+def play_chess_game(game, player_one="WHITE", player_two="BLACK"):
+    """
+     Manages the flow of a chess game by repeatedly prompting the user for moves and applying them to the game state.
 
-    print(game.get_game_state())
+    Args:
+        game (ChessVar): An instance of ChessVar that represents the current state of the chess game.
+
+    Returns:
+        None
+    """
+    # Repeatedly asks for moves until either player wins
+    while game.get_game_state() == "UNFINISHED":
+        # Checks for and executes valid moves
+        while True:
+            game.print_board_display()
+            player_turn = player_one if (game.get_player_turn() == "WHITE") else player_two
+            print(f"{player_turn}'s turn:")
+            start, end, fairy = input("Enter move (start/end/fairy): ").split("/")
+            if start == "END":
+                game.set_game_state("END")
+                break
+            elif fairy == "x": # Regular move
+                if game.make_move(start, end):
+                    break
+            else:            # Fairy placement move
+                if game.enter_fairy_piece(fairy, start):
+                    break
+            print("You have entered an invalid move. Please enter a valid move.")
+        clear_console()
+
+    # Display result
+    result = game.get_game_state()
+    if result == "WHITE_WON":
+        print(f"Congratulations, {player_one}, you won!")
+    elif result == "BLACK_WON":
+        print(f"Congratulations, {player_two}, you won!")
+    else:
+        print("You have ended the game.")
+
+def play_custom_board(board):
+    play = input("Would you like to play a game of chess? Enter YES or NO: ")
+    while play == "YES":
+        player_one_name = input("Enter Player 1's name: ")
+        player_two_name = input("Enter Player 2's name: ")
+        game = ChessVar(player_one_name, player_two_name)
+        play_chess_game(game, player_one_name, player_two_name)
+        play = input("Play a new game? Enter YES or NO: ")
+
+def main():
+    """
+    Initiates a chess game session with two players.
+
+    This method does not require any arguments.
+
+    Returns:
+        None
+    """
+    play = input("Would you like to play a game of chess? Enter YES or NO: ")
+    while play == "YES":
+        player_one_name = input("Enter Player 1's name: ")
+        player_two_name = input("Enter Player 2's name: ")
+        game = ChessVar(player_one_name, player_two_name)
+        play_chess_game(game, player_one_name, player_two_name)
+        play = input("Play a new game? Enter YES or NO: ")
+
+def clear_console():
+    print("\n" * 100)  # Print 100 newlines
+
+if __name__ == "__main__":
+    main()
