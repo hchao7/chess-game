@@ -26,6 +26,7 @@ class Player:
 
         Args:
             reserve_list (list): Fairy pieces assigned to player.
+            name (str): Name of player.
         """
         self._reserve_list = reserve_list
         self._fairy_piece_entry = False
@@ -168,15 +169,15 @@ class Player:
 
 class Pieces:
     """
-        A static class representing chess pieces.
+    A static class representing chess pieces.
 
-        This class has static methods that determine if a chess move by any chess piece is valid.
-        Each method checks the validity of moves based on the specific movement rules of each piece.
-        It communicates with:
-        ChessVar class — Called by is_valid_move() to determine if a move is valid.
+    This class has static methods that determine if a chess move by any chess piece is valid.
+    Each method checks the validity of moves based on the specific movement rules of each piece.
+    It communicates with:
+    ChessVar class — Called by is_valid_move() to determine if a move is valid.
 
-        Attributes:
-            None
+    Attributes:
+        None
     """
 
     def is_valid_move_for_king(alg_start_coordinate, alg_end_coordinate, chess_var):
@@ -716,16 +717,16 @@ class Pieces:
 
 class Board:
     """
-        A class representing a chess board.
+    A class representing a chess board.
 
-        This class has methods for placing, removing, and retrieving chess pieces on a board.
-        It communicates with:
-        ChessVar class — Has 1 Board instance declared as an attribute.
+    This class has methods for placing, removing, and retrieving chess pieces on a board.
+    It communicates with:
+    ChessVar class — Has 1 Board instance declared as an attribute.
 
-        Attributes:
-            _board_display (list): Chess board (a grid) with rows and columns.
-            _letter_to_column_dict (dict): Maps each letter to its corresponding column index in _board_display.
-            _number_to_row_dict (dict): Maps each number to its corresponding row index in _board_display.
+    Attributes:
+        _board_display (list): Chess board (a grid) with rows and columns.
+        _letter_to_column_dict (dict): Maps each letter to its corresponding column index in _board_display.
+        _number_to_row_dict (dict): Maps each number to its corresponding row index in _board_display.
     """
 
     def __init__(self, board_display=None):
@@ -733,7 +734,9 @@ class Board:
         Initializes a new Board instance.
 
         _board_display is initialized with the white and black chess pieces in their starting positions.
-        This method does not require any arguments.
+
+        Args:
+            board_display (list): Chess board (a grid) with rows and columns.
 
         Returns:
             None
@@ -785,20 +788,6 @@ class Board:
             None
         """
         self._board_display = board_display
-
-    # def print_board_display(self):
-    #     """
-    #     Prints _board_display.
-    #
-    #     This method does not require any arguments.
-    #
-    #     Returns:
-    #         None
-    #     """
-    #     print()
-    #     for row in range(9):
-    #         row_string = "    ".join(self._board_display[row])
-    #         print(row_string)
 
     def alg_coordinate_to_list_index(self, alg_coordinate):
         """
@@ -901,8 +890,12 @@ class ChessVar:
         """
         Initializes a new ChessVar instance.
 
-        This method does not require any arguments.
         The white-piece player has the first turn.
+
+        Args:
+            name_white (str): Name of first player.
+            name_black (str): Name of second player.
+            board_display (list): Grid that ChessVar's Board instance is initialized with.
 
         Returns:
             None
@@ -988,7 +981,7 @@ class ChessVar:
 
     def print_board_display(self):
         """
-        Prints _board_display.
+        Prints player names, their reserve lists of fairy pieces, and _board_display.
 
         This method does not require any arguments.
 
@@ -998,13 +991,16 @@ class ChessVar:
         black_piece_player = self.get_player("BLACK")
         white_piece_player = self.get_player("WHITE")
         print("\n")
-        print(f"{' ' * 5}{black_piece_player.get_name()}: {black_piece_player.get_reserve_list()}")
+        # Prints black_piece_player's reserve list
+        print(f"{' ' * 5}{black_piece_player.get_name()}'s reserve: {black_piece_player.get_reserve_list()}")
         print(f"{' ' * 18}BLACK")
+        # Prints chess board
         for row in range(9):
             row_string = "    ".join(self._board.get_board_display()[row])
             print(row_string)
         print(f"{' ' * 18}WHITE")
-        print(f"{' ' * 5}{white_piece_player.get_name()}: {white_piece_player.get_reserve_list()}")
+        # Prints white_piece_player's reserve list
+        print(f"{' ' * 5}{white_piece_player.get_name()}'s reserve: {white_piece_player.get_reserve_list()}")
         print("\n")
 
     def make_move(self, alg_start_coordinate, alg_end_coordinate):
@@ -1230,7 +1226,7 @@ class ChessVar:
 
         # Decrements _capture_count
         player.update_capture_count(-1)
-        player.update_fairy_piece_entry
+        player.update_fairy_piece_entry()
 
     def verify_fairy_piece_and_position(self, fairy_piece_type, placement_square):
         """
@@ -1278,6 +1274,8 @@ def play_chess_game(game, player_one="WHITE", player_two="BLACK"):
 
     Args:
         game (ChessVar): An instance of ChessVar that represents the current state of the chess game.
+        player_one (str): Name of first player.
+        player_two (str): Name of second player.
 
     Returns:
         None
@@ -1300,9 +1298,9 @@ def play_chess_game(game, player_one="WHITE", player_two="BLACK"):
                 if game.enter_fairy_piece(fairy, start):
                     break
             print("You have entered an invalid move. Please enter a valid move.")
-        clear_console()
 
-    # Display result
+    # Displays result
+    game.print_board_display()
     result = game.get_game_state()
     if result == "WHITE_WON":
         print(f"Congratulations, {player_one}, you won!")
@@ -1312,11 +1310,21 @@ def play_chess_game(game, player_one="WHITE", player_two="BLACK"):
         print("You have ended the game.")
 
 def play_custom_board(board):
+    """
+    Initiates a chess game session with two players.
+    The board can be configured in a specific position for testing purposes.
+
+    Args:
+        board (list): Grid that ChessVar's Board instance is initialized with.
+
+    Returns:
+        None
+    """
     play = input("Would you like to play a game of chess? Enter YES or NO: ")
     while play == "YES":
         player_one_name = input("Enter Player 1's name: ")
         player_two_name = input("Enter Player 2's name: ")
-        game = ChessVar(player_one_name, player_two_name)
+        game = ChessVar(player_one_name, player_two_name, board)
         play_chess_game(game, player_one_name, player_two_name)
         play = input("Play a new game? Enter YES or NO: ")
 
@@ -1336,9 +1344,6 @@ def main():
         game = ChessVar(player_one_name, player_two_name)
         play_chess_game(game, player_one_name, player_two_name)
         play = input("Play a new game? Enter YES or NO: ")
-
-def clear_console():
-    print("\n" * 100)  # Print 100 newlines
 
 if __name__ == "__main__":
     main()
