@@ -15,7 +15,7 @@ piece movement and game state management. All classes and a standalone main func
 - [Acknowledgements](#Acknowledgements)
 
 ## Installation
-Download the code and execute **ChessVar.py** within a Python environment to start playing.
+Download **ChessVar.py** and execute within a Python environment to start playing.
 
 ## Rules
 The following explanation of the rules assumes some familiarity with the rules of chess — specifically how the pieces move 
